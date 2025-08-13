@@ -24,6 +24,30 @@ I tried to implement something close to what this paper does based on the depend
 Check dependency2vec-full-clean.ipynb for results. I could not see any pattern in the resulting plots, so I abandoned the idea for now and tried contextual embeddings instead. 
 
 # Pre-trained contextual embeddings 
-Check context_embedding_full.ipynb. 
-I used model = SentenceTransformer("distiluse-base-multilingual-cased-v2") which is a popular Huggingface model to try it out, but we can try other models later. 
+Use this snippet to import the pickled embeddings into your notebook: 
 
+import os
+import pickle
+from collections import defaultdict
+from load_embeddings import load_char_embeddings
+
+input_dir = "char_embeddings_by_group_all_with_utts"
+char_embeddings_by_group = defaultdict(lambda: defaultdict(list))
+
+for filename in os.listdir(input_dir):
+    if filename.endswith(".pkl"):
+        char, group = filename.replace(".pkl", "").split("_")
+        with open(os.path.join(input_dir, filename), "rb") as f:
+            vectors = pickle.load(f)
+            char_embeddings_by_group[char][group] = vectors
+char_embeddings_by_group = load_char_embeddings()
+
+char_embeddings is a dictionary with the following structure: 
+{
+    "child": { age: character: [(embedding_vector, utterance), ...], ... },
+    "adult": character: [(embedding_vector, utterance), ...]
+}
+where "character" refers to one of "把", "被", "給".
+
+Check context_embedding_full.ipynb to see how the embeddings were created and the first few PCA plots. 
+I used model = SentenceTransformer("distiluse-base-multilingual-cased-v2") which is a popular Huggingface model to try it out, but we can try other models later. 
