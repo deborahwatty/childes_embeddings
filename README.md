@@ -13,9 +13,10 @@ data = clean_chinese_utterances(get_all_utterance_gra_by_group_folder("Mandarin"
 This returns cleaned up utterances (only Chinese characters remaining) along with the GRA tier info: 
 
     {
-      "child": { age: [(utterance, gra), ...], ... },
-      "adult": [(utterance, gra), ...]
+        "child": { age: [(utterance, gra), ...], ... },
+        "adult": [(utterance, gra), ...]
     }
+
 
 CAUTION: I am not sure yet if there are any instances where cleaning up non-Chinese characters causes problems (such as if someone uses a foreign word?) 
 
@@ -34,20 +35,41 @@ from load_embeddings import load_char_embeddings
 input_dir = "char_embeddings_by_group_all_with_utts"
 char_embeddings_by_group = defaultdict(lambda: defaultdict(list))
 
-for filename in os.listdir(input_dir):
-    if filename.endswith(".pkl"):
-        char, group = filename.replace(".pkl", "").split("_")
-        with open(os.path.join(input_dir, filename), "rb") as f:
-            vectors = pickle.load(f)
-            char_embeddings_by_group[char][group] = vectors
-char_embeddings_by_group = load_char_embeddings()
+    for filename in os.listdir(input_dir):
+        if filename.endswith(".pkl"):
+            char, group = filename.replace(".pkl", "").split("_")
+            with open(os.path.join(input_dir, filename), "rb") as f:
+                vectors = pickle.load(f)
+                char_embeddings_by_group[char][group] = vectors
+    char_embeddings_by_group = load_char_embeddings()
 
 char_embeddings is a dictionary with the following structure: 
-{
-    "child": { age: character: [(embedding_vector, utterance), ...], ... },
-    "adult": character: [(embedding_vector, utterance), ...]
-}
+
+    {
+        "child": { age: character: [(embedding_vector, utterance), ...], ... },
+        "adult": character: [(embedding_vector, utterance), ...]
+    }
 where "character" refers to one of "把", "被", "給".
 
-Check context_embedding_full.ipynb to see how the embeddings were created and the first few PCA plots. 
-I used model = SentenceTransformer("distiluse-base-multilingual-cased-v2") which is a popular Huggingface model to try it out, but we can try other models later. 
+Check `context_embedding_full.ipynb` to see how the embeddings were created and the first few PCA plots. 
+I used `model = SentenceTransformer("distiluse-base-multilingual-cased-v2")` which is a popular Huggingface model to try it out, but we can try other models later. 
+
+# Fine-tuned contextual embeddings 
+Trained in `finetune.ipynb`, used in `use_finetune.ipynb`. Only ages 2-6 are considered for children because data is too sparse for the other age groups. 
+`balanced_train_test_data.json` contains a 21497 randomly selected training examples and 5375 randomly selected test examples for each considered age group. The models for each age group were finetuned on the training examples and the plots were generated on the test examples. 
+To work with the finetuned models, first import the JSON to ensure you are only working with the test examples: 
+
+    # Load JSON
+    with open("balanced_train_test_data.json", "r", encoding="utf-8") as f:
+        data = json.load(f)
+    
+    # Access train/test splits
+    train_data_loaded = data["train"]
+    test_data_loaded = data["test"]
+
+Then, load the actual embeddings for a certain age and character with 
+
+    data = np.load(f"embeddings_age{age}/{char}_embeddings.npz", allow_pickle=True)
+    embs = data["embeddings"]
+
+(see `use_finetune.ipynb` for a usage example) 
