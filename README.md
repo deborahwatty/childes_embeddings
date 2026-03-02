@@ -27,6 +27,7 @@ Check dependency2vec-full-clean.ipynb for results. I could not see any pattern i
 # Pre-trained contextual embeddings 
 Use this snippet to import the pickled embeddings into your notebook: 
 
+```python
 import os
 import pickle
 from collections import defaultdict
@@ -42,6 +43,8 @@ char_embeddings_by_group = defaultdict(lambda: defaultdict(list))
                 vectors = pickle.load(f)
                 char_embeddings_by_group[char][group] = vectors
     char_embeddings_by_group = load_char_embeddings()
+
+```
 
 char_embeddings is a dictionary with the following structure: 
 
