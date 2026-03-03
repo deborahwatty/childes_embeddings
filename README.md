@@ -55,7 +55,6 @@ char_embeddings is a dictionary with the following structure:
 where "character" refers to one of "把", "被", "給".
 
 Check `context_embedding_full.ipynb` to see how the embeddings were created and the first few PCA plots. 
-I used `model = SentenceTransformer("distiluse-base-multilingual-cased-v2")` which is a popular Huggingface model to try it out, but we can try other models later. 
 
 # Fine-tuned contextual embeddings 
 Trained in `finetune.ipynb`, used in `use_finetune.ipynb`. Only ages 2-6 are considered for children because data is too sparse for the other age groups. 
